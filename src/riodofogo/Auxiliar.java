@@ -16,8 +16,8 @@ import java.io.FileReader;
 public class Auxiliar {
     /**
      * 
-     * @param caminho
-     * @return
+     * @param caminho - Caminho/Localização do arquivo 
+     * @return BufferedReader 
      * @throws FileNotFoundException 
      */
     public static BufferedReader leituraArquivo(String caminho) throws FileNotFoundException{
