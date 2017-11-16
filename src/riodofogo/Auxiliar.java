@@ -23,6 +23,7 @@ public class Auxiliar {
     public static BufferedReader leituraArquivo(String caminho) throws FileNotFoundException{
         FileReader arquivo = new FileReader(caminho);
         BufferedReader lerArquivo = new BufferedReader(arquivo);
+        System.out.println("Lendo arquvio: "+arquivo);
         return lerArquivo;
     }
 }
