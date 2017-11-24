@@ -5,7 +5,11 @@
  */
 package riodofogo.telas;
 
+import java.util.List;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import riodofogo.coleta.Coleta;
+import riodofogo.coleta.Leitura;
 
 /**
  *
@@ -141,7 +145,14 @@ public class Principal extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
+        System.out.println("Ler o arquivo!");
+        
+        if(tf_caminho_arquivo.getText().toString().equals("")){
+            JOptionPane.showMessageDialog(this, "Você deve escolher o Arquivo da coleta antes!", this.getTitle(), JOptionPane.INFORMATION_MESSAGE);
+        }else{
+            List<Coleta> lista = Leitura.lerArquivo(tf_caminho_arquivo.getText());
+            System.out.println("Número de Coletas: "+lista.size());
+        }        
     }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
