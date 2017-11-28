@@ -8,14 +8,10 @@ package riodofogo.relogio;
 public class Relogio {
     private int idRelogio;
     private String nomeRelogio;
-    private int idUnidade;
-    private String nomeUnidade;
-
-    public Relogio(int idRelogio, String nomeRelogio, int idUnidade, String nomeUnidade) {
+    
+    public Relogio(int idRelogio, String nomeRelogio) {
         this.idRelogio = idRelogio;
-        this.nomeRelogio = nomeRelogio;
-        this.idUnidade = idUnidade;
-        this.nomeUnidade = nomeUnidade;
+        this.nomeRelogio = nomeRelogio;       
     }
 
     public int getIdRelogio() {
@@ -33,20 +29,8 @@ public class Relogio {
     public void setNomeRelogio(String nomeRelogio) {
         this.nomeRelogio = nomeRelogio;
     }
-
-    public int getIdUnidade() {
-        return idUnidade;
-    }
-
-    public void setIdUnidade(int idUnidade) {
-        this.idUnidade = idUnidade;
-    }
-
-    public String getNomeUnidade() {
-        return nomeUnidade;
-    }
-
-    public void setNomeUnidade(String nomeUnidade) {
-        this.nomeUnidade = nomeUnidade;
-    }
 }
+          
+
+
+    
