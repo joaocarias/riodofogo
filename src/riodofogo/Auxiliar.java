@@ -16,14 +16,13 @@ import java.io.FileReader;
 public class Auxiliar {
     /**
      * 
-     * @param caminho
-     * @return
+     * @param caminho - Caminho/Localização do arquivo 
+     * @return BufferedReader 
      * @throws FileNotFoundException 
      */
     public static BufferedReader leituraArquivo(String caminho) throws FileNotFoundException{
         FileReader arquivo = new FileReader(caminho);
-        BufferedReader lerArquivo = new BufferedReader(arquivo);
-        System.out.println("Lendo arquvio: "+arquivo);
+        BufferedReader lerArquivo = new BufferedReader(arquivo);     
         return lerArquivo;
     }
 }
