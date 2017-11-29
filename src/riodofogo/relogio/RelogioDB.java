@@ -22,9 +22,7 @@ public class RelogioDB implements RelogioDBInterface{
             FachadaBanco fb = new FachadaBanco();
             Connection conn = fb.criarConecaoMySQL();            
             Statement stm = conn.createStatement();
-            
-            System.out.println("asd " + fb.testarConexao(conn));
-            
+                     
             String query = "select id_relogio, descricao from relogios order by descricao";
             System.out.println("Buscando Lista de Relógios...");
             

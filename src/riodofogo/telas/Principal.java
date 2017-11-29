@@ -10,10 +10,10 @@ import java.util.List;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import riodofogo.coleta.Coleta;
+import riodofogo.coleta.FachadaColeta;
 import riodofogo.coleta.Leitura;
+import riodofogo.relogio.FachadaRelogio;
 import riodofogo.relogio.Relogio;
-import riodofogo.relogio.RelogioDB;
-import riodofogo.relogio.RelogioDBInterface;
 
 /**
  *
@@ -26,16 +26,16 @@ public class Principal extends javax.swing.JFrame {
      */
     public Principal() {
         
-        RelogioDBInterface relogioDB = new RelogioDB();
-        List<Relogio> listaRelogios = relogioDB.getList();
+        initComponents();
+                 
+        FachadaRelogio fr = new FachadaRelogio();
+        List<Relogio> listaRelogios = fr.getList();
                       
         Iterator it = listaRelogios.iterator();
         while(it.hasNext()){
-            Relogio r = (Relogio) it.next();
-            System.out.println(r.getIdRelogio()+" - "+r.getNomeRelogio());
-        }
-        
-        initComponents();
+            Relogio r = (Relogio) it.next();          
+            cbRelogios.addItem(r.getIdRelogio()+" - "+r.getNomeRelogio());
+        }               
     }
 
     /**
@@ -55,7 +55,7 @@ public class Principal extends javax.swing.JFrame {
         jTextArea1 = new javax.swing.JTextArea();
         jButton2 = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
-        jComboBox1 = new javax.swing.JComboBox<>();
+        cbRelogios = new javax.swing.JComboBox<>();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
@@ -96,8 +96,6 @@ public class Principal extends javax.swing.JFrame {
 
         jLabel2.setText("Relógio:");
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -109,7 +107,7 @@ public class Principal extends javax.swing.JFrame {
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel2)
                         .addGap(3, 3, 3)
-                        .addComponent(jComboBox1, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(cbRelogios, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addGap(3, 3, 3)
@@ -127,7 +125,7 @@ public class Principal extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cbRelogios, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
@@ -143,6 +141,11 @@ public class Principal extends javax.swing.JFrame {
         jMenu1.setText("Arquivo");
 
         jMenuItem1.setText("Sair");
+        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem1ActionPerformed(evt);
+            }
+        });
         jMenu1.add(jMenuItem1);
 
         jMenuBar1.add(jMenu1);
@@ -200,17 +203,53 @@ public class Principal extends javax.swing.JFrame {
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         System.out.println("Ler o arquivo!");
         
+        int contColetasJaSalvas = 0;
+        int contColetasComPisNaoEncontrado = 0;
+        int contColetasSalvas = 0;
+        int contColetaErros = 0;
+        
         if(tf_caminho_arquivo.getText().toString().equals("")){
             JOptionPane.showMessageDialog(this, "Você deve escolher o Arquivo da coleta antes!", this.getTitle(), JOptionPane.INFORMATION_MESSAGE);
         }else{
-            List<Coleta> lista = Leitura.lerArquivo(tf_caminho_arquivo.getText());
+                
+            FachadaColeta fc = new FachadaColeta();
+            
+            Leitura in = new Leitura();
+            List<Coleta> lista = in.lerArquivo(tf_caminho_arquivo.getText());
             System.out.println("Número de Coletas: "+lista.size());
-        }        
+            
+            Iterator it = lista.iterator();
+            
+            while(it.hasNext()){
+                Coleta c = (Coleta) it.next();
+                int idServidor = fc.getIdServidorPorPis(c.getPis());
+                if(idServidor > 1){
+                    contColetasSalvas++;
+                }else if(idServidor == 0){
+                    contColetasComPisNaoEncontrado++;
+                }else if(idServidor == -1){
+                    contColetaErros++;
+                }else{
+                    contColetasJaSalvas++;
+                }
+            }                        
+        }   
+        
+        System.out.println("Coletas Salvas: "+contColetasSalvas);
+        System.out.println("Coletas Já Salvas: "+contColetasJaSalvas);
+        System.out.println("Coletas Com PIS não Encontrado: "+contColetasComPisNaoEncontrado);
+        System.out.println("Erros: "+contColetaErros);
+        
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jMenuItem2ActionPerformed
+
+    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+        System.out.println("["+this.getTitle().toUpperCase()+"] Saindo do Sistema...");
+        System.exit(0);
+    }//GEN-LAST:event_jMenuItem1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -248,9 +287,9 @@ public class Principal extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JComboBox<String> cbRelogios;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
-    private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JMenu jMenu1;

@@ -15,7 +15,7 @@ import riodofogo.Auxiliar;
  * @author joao.franca
  */
 public class Leitura {
-    public static List<Coleta> lerArquivo(String caminho){
+    public List<Coleta> lerArquivo(String caminho){
         try{                
             List<Coleta> coletas = new LinkedList<Coleta>();
             BufferedReader in = Auxiliar.leituraArquivo(caminho);
