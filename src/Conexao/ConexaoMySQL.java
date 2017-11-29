@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package Conexao;
 
 import java.sql.Connection;
@@ -14,7 +10,7 @@ import riodofogo.Propriedades;
  *
  * @author joao.franca
  */
-public class ConexaoMySQL implements Conexao {
+public class ConexaoMySQL implements ConexaoInterface {
     private boolean status;  
     private String servidor;
     private String nomeBanco;

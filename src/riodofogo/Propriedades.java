@@ -56,23 +56,23 @@ public class Propriedades {
         }
     }    
     
-    public String getPorta(String banco, String tipo){
+    public String getPorta(){
         return lerPropriedade("porta_mysql");        
     }
     
-    public String getServidor(String banco, String tipo){
+    public String getServidor(){
         return lerPropriedade("servidor_mysql");
     }
      
-    public String getNomeBanco(String banco, String tipo){
+    public String getNomeBanco(){
         return lerPropriedade("banco_mysql");            
     }
      
-    public String getUsuario(String banco, String tipo){
+    public String getUsuario(){
        return lerPropriedade("usuario_mysql");            
     }
           
-    public String getSenha(String banco, String tipo) {
+    public String getSenha() {
         return lerPropriedade("senha_mysql");            
     }
 }

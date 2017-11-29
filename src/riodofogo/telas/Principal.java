@@ -5,11 +5,15 @@
  */
 package riodofogo.telas;
 
+import java.util.Iterator;
 import java.util.List;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import riodofogo.coleta.Coleta;
 import riodofogo.coleta.Leitura;
+import riodofogo.relogio.Relogio;
+import riodofogo.relogio.RelogioDB;
+import riodofogo.relogio.RelogioDBInterface;
 
 /**
  *
@@ -21,6 +25,16 @@ public class Principal extends javax.swing.JFrame {
      * Creates new form Principal
      */
     public Principal() {
+        
+        RelogioDBInterface relogioDB = new RelogioDB();
+        List<Relogio> listaRelogios = relogioDB.getList();
+                      
+        Iterator it = listaRelogios.iterator();
+        while(it.hasNext()){
+            Relogio r = (Relogio) it.next();
+            System.out.println(r.getIdRelogio()+" - "+r.getNomeRelogio());
+        }
+        
         initComponents();
     }
 

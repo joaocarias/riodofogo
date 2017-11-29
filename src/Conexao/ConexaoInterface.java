@@ -7,7 +7,7 @@ import java.sql.Connection;
  *
  * @author joao.franca
  */
-public interface Conexao {
+public interface ConexaoInterface {
     public boolean testarConexao();
     public Connection criarCriacao();
     public boolean disconectar();
