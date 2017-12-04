@@ -12,7 +12,7 @@ public class FachadaBanco {
     public Connection criarConecaoMySQL(){
         try{
             ConexaoInterface c = new ConexaoMySQL();
-            Connection conn = c.criarCriacao();
+            Connection conn = c.criarConexao();
             return conn;
         }catch(Exception e){
             System.err.println(e.toString());

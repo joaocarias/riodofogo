@@ -9,7 +9,7 @@ import java.sql.Connection;
  */
 public interface ConexaoInterface {
     public boolean testarConexao();
-    public Connection criarCriacao();
+    public Connection criarConexao();
     public boolean disconectar();
     public int getPorta();
     public void setPorta(int porta);

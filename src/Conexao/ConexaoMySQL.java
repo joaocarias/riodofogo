@@ -48,7 +48,7 @@ public class ConexaoMySQL implements ConexaoInterface {
     }
 
     @Override
-    public Connection criarCriacao() {
+    public Connection criarConexao() {
         this.conn = null;
         
         try {

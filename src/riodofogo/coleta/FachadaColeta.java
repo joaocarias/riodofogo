@@ -11,5 +11,10 @@ public class FachadaColeta {
         return c.getIdServidorPorPis(pis);        
     }
     
+    public boolean gravarColeta(int idServidor, int idRelogio, Coleta coleta){
+        ColetaDBInterface c = new ColetaDB();
+        return c.gravarColeta(idServidor, idRelogio, coleta);
+    }
+    
     
 }

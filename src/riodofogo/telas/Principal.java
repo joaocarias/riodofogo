@@ -224,6 +224,7 @@ public class Principal extends javax.swing.JFrame {
                 Coleta c = (Coleta) it.next();
                 int idServidor = fc.getIdServidorPorPis(c.getPis());
                 if(idServidor > 1){
+                    boolean b = fc.gravarColeta(idServidor, 1, c);
                     contColetasSalvas++;
                 }else if(idServidor == 0){
                     contColetasComPisNaoEncontrado++;

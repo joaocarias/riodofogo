@@ -22,7 +22,7 @@ public class ColetaDB implements ColetaDBInterface {
     public int getIdServidorPorPis(String pis) {
         try{
             ConexaoInterface ci = new ConexaoMySQL();
-            Connection conn = ci.criarCriacao();
+            Connection conn = ci.criarConexao();
             Statement stm = conn.createStatement();
             
             int idServidor = 0;
@@ -46,11 +46,96 @@ public class ColetaDB implements ColetaDBInterface {
         }
     }
 
+    
     @Override
     public boolean gravarColeta(int idServidor, int idRelogio, Coleta coleta) {
+        if(verificarColetaInserida(idServidor, idRelogio, coleta)){
+            System.out.println("Ingnorar coleta, já que a mesma já se encontra inserida");
+        }else{
+            
+            int idRegistroAberto = this.getIdRegistroAberto(idServidor);
+            
+            if(idRegistroAberto > 0){
+                System.out.println("Buscar registro aberto");
+            }else{
+                System.out.println("inserir registro no BD");
+            }            
+        }
         return true;
     }
     
+    /**
+     * Método busca se existe algum registro/ponto em aberto e identifica qual 
+     * registro está em aberto.
+     * @param idServidor - int - Id de identificação do servidor
+     * @return - Retorna um intereiro contendo o id do registro em aberto, desde que exista, 
+     * caso não encontrado, então retorna o inteiro 0 (zero). Retorna -1 em caso de erro.
+     */
+    private int getIdRegistroAberto(int idServidor){
+        try{
+            int idRegistroAberto = 0;
+            
+            ConexaoInterface ci = new ConexaoMySQL();
+            Connection conn = ci.criarConexao();
+            Statement stm = conn.createStatement();
+            
+            String query = "SELECT `id_registro` FROM `registro` "
+                    + "WHERE `id_servidor` = '"+idServidor+"' AND `st_registro` = '1' ";
+            
+            ResultSet rs = stm.executeQuery(query);
+            
+            while(rs.next()){
+                idRegistroAberto = Integer.parseInt(rs.getString("id_registro"));
+            }
+            
+            rs.close();
+            stm.close();
+            conn.close();
+            
+            return idRegistroAberto;
+        }catch(Exception e){
+            System.err.println(e.toString());
+            return -1;
+        }        
+    }
+    
+    /**
+     * Médodo busca a existe de uma coleta específica no banco de dados.
+     * @param $idServidor - ID do Servidor
+     * @param idRelogio - ID de identificação do Relógio
+     * @param coleta - Objeto Coleta, contendo as informações básicas da coleta.
+     * @return boolean - Retorna TRUE se encontrado, e FALSE se não for encontrado.
+     */    
+    private boolean verificarColetaInserida(int $idServidor, int idRelogio, Coleta coleta){
+        try{
+            ConexaoInterface ci = new ConexaoMySQL();
+            Connection conn = ci.criarConexao();
+            Statement stm = conn.createStatement();
+            
+            String sql = " SELECT id_registro FROM registro "
+                    + "WHERE id_servidor = '"+$idServidor+"' "
+                        + "AND (nsr_entrada = '"+coleta.getNsr()+"' OR nsr_saida = '"+coleta.getNsr()+"') "
+                        + "AND (idrelogio_entrada = '"+idRelogio+"' OR idrelogio_saida = '"+idRelogio+"') ";
+            
+            ResultSet rs = stm.executeQuery(sql);
+                                   
+            int cont = 0;
+            
+            while(rs.next()){
+                cont++;
+            }
+            
+            System.out.println("Verificando existe de Coleta de PIS: "+coleta.getPis()+" e NSR: "+coleta.getNsr());            
+            if(cont > 0){
+                return true;
+            }else{
+                return false;
+            }                       
+        }catch(Exception e){
+            System.err.println(e.getMessage());
+            return false;
+        }
+    }
     
     
 }
