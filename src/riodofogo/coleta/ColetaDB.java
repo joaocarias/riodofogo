@@ -127,6 +127,81 @@ public class ColetaDB implements ColetaDBInterface {
     }
     
     /**
+     * Este método realiza a atualização de ponto/registro como saida 
+     * @param idRegistro - ID de registro 
+     * @param dataSaida - Data de Saída 
+     * @return - Returna <i>TRUE</i> quando a operação não apresenta erro durantes
+     * a execução; e <i>FALSE</i> quando ocorre algum problema durante a execução.
+     */
+    private boolean inserirComoSaida(String idRegistro, String dataSaida, String idServidor, String nsr, String idRelogio){
+        try{            
+            
+            String obs = ", obs = NULL";
+            
+            ConexaoMySQL conexao = new ConexaoMySQL();
+            Connection conn = conexao.criarConexao();
+            
+            Statement stm = conn.createStatement();
+            Statement stm1 = conn.createStatement();
+            
+            String justificado = "SELECT obs FROM `registro`"
+                    + " WHERE id_registro = '"+idRegistro+"' and registro_justificado = '1' "
+                    + "ORDER BY `dt_entrada` DESC";
+            
+            ResultSet rs = stm1.executeQuery(justificado);
+            
+            while(rs.next()){
+                obs = "";
+            }           
+            
+            String updateSaida = "UPDATE `registro` SET `dt_saida`= '"+dataSaida+"', st_registro = '0', st_ponto_aberto = 0 "+obs+", `data_ultima_atualizacao`= NOW(), `atualizado_por`= 'JAVINHA_SMS', `nsr_saida` = '"+nsr+"', `idrelogio_saida` = '"+idRelogio+"'  WHERE `id_registro` = '"+idRegistro+"'";
+            System.out.println(updateSaida);
+            
+            boolean b = stm.execute(updateSaida);
+            
+            mudaStatus(idServidor, 0);
+            
+            stm.close();
+            conn.close();
+            
+            return true;
+        }catch(Exception e){
+            System.err.println(e.getMessage());
+            return false;
+        }
+    }
+    
+     /**
+     * Método muda o Status de Presente ou ausente para este servidor 
+     * @param idServidor - ID de identificação do Servidor
+     * @param novoStatus - Int Novo Status para o servidor
+     * @return - Retorna <i>TRUE</i> caso as operações de atualização ocorra bem, 
+     * ou retorna <i>FALSE</i> em caso a execuação de atualização ocorra erro.
+     */
+    private boolean mudaStatus(String idServidor, int novoStatus){
+        try{
+            
+            ConexaoMySQL conexao = new ConexaoMySQL();
+            Connection conn = conexao.criarConexao();
+            
+            Statement stm = conn.createStatement();
+                        
+            String query = "UPDATE servidor SET status_servidor_presente = '"+novoStatus+"' WHERE id_servidor ='"+idServidor+"'";
+            
+            boolean b = stm.execute(query);
+           
+            stm.close();
+            conn.close();
+            
+            return true;
+        }catch(Exception e){
+            System.err.println(e.getMessage());
+            return false;
+        }
+    }
+    
+    
+    /**
      * Método testar se o servidor é plantomista
      * @param idServidor - Id do Servidor 
      * @return - Retorna <i>TRUE</i> em caso do servidor seja plantonista. Retorna <i>FALSE</i>
