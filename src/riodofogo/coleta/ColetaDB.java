@@ -110,20 +110,68 @@ public class ColetaDB implements ColetaDBInterface {
                 Registro registro = this.getRegistroAbertoMySQL(idRegistroAberto);
                 int testeDatasIguais = Auxiliar.compareData(coleta.getData(), registro.getDt_entrada());
                 if(testeDatasIguais > 0){
-                    System.out.println("Inserir como saida");
+                    if(inserirComoSaida(idRegistroAberto, coleta.getData(), idServidor, coleta.getNsr(), idRelogio)){                        
+                        System.out.println("SAÍDA: "+coleta.getData());                        
+                    }else{
+                        System.err.println("Erro ao inserir saida no ponto: "+coleta.getData()+" PIS: "+coleta.getPis());                        
+                    }
                 }else{
-                    System.out.println("Inserir saida automaticamente");
-                    System.out.println("Inserir como entrada");
+                    fecharSaidaAutomatico(idRegistroAberto, coleta.getData(), idServidor);
+                    System.out.println("Ponto Fechado Automaticamente: "+coleta.getData());                        
+                    inserirComoEntrada(idServidor, coleta.getData(), coleta.getNsr(), idRelogio);                      
+                    System.out.println("ENTRADA: "+coleta.getData());
                 }                
             }else{
                 if(testarServidorPlantonistaNoturno(idServidor)){
-                    System.out.println("Servidor Plantonista");
-                }else{
-                    System.out.println("2 Inserir como nova entrada");
-                }
+                    int idRegistroFechadoAutomatico = testarRegistroFechadoAutomaticoPorEmDiaAnterior(coleta.getData(), idServidor);
+                        if(idRegistroFechadoAutomatico > 0){
+                            if(inserirComoSaida(idRegistroFechadoAutomatico, coleta.getData(), idServidor, coleta.getNsr(), idRelogio)){
+                                System.out.println("Inserido Saída Ponto: "+coleta.getData()+" "+idRegistroFechadoAutomatico);                                              
+                            }else{
+                                System.err.println("Erro ao inserir saida no ponto: "+coleta.getData());                            
+                            }
+                        }else{
+                            if(inserirComoEntrada(idServidor, coleta.getData(), coleta.getNsr(), idRelogio)){
+                                System.out.println("ENTRADA: "+coleta.getData());                            
+                            }else{
+                                System.err.println("Erro ao inserir ponto: "+coleta.getData());
+                            }  
+                        }
+                    }else{
+                        System.out.println("2 Inserir como nova entrada");
+                    }
             }            
         }
         return true;
+    }
+    
+     /**
+     * Método insere um novo registro do Ponto na tabela do MySQL
+     * @param idServidor - String - ID de Identificação do Servidor
+     * @param dataEntrada - String data do registro
+     * @return 
+     */
+    private boolean inserirComoEntrada(int idServidor, String dataEntrada, String nsr, int idRelogio){
+        try{            
+            ConexaoMySQL conexao = new ConexaoMySQL();
+            Connection conn = conexao.criarConexao();
+            
+            Statement stm = conn.createStatement();
+            
+            String updateSaida = "INSERT INTO `registro`(`id_servidor`, `dt_entrada`, `data_ultima_atualizacao`, `atualizado_por`, `nsr_entrada`, `idrelogio_entrada`) VALUES ('"+idServidor+"', '"+dataEntrada+"', NOW(), 'JAVINHA_SMS', '"+nsr+"', '"+idRelogio+"')";
+            
+            boolean b = stm.execute(updateSaida);
+            
+            mudaStatus(idServidor, 1);         
+                      
+            stm.close();
+            conn.close();
+            
+            return true;
+        }catch(Exception e){
+            System.err.println(e.toString());
+            return false;
+        }
     }
     
     /**
@@ -133,7 +181,39 @@ public class ColetaDB implements ColetaDBInterface {
      * @return - Returna <i>TRUE</i> quando a operação não apresenta erro durantes
      * a execução; e <i>FALSE</i> quando ocorre algum problema durante a execução.
      */
-    private boolean inserirComoSaida(String idRegistro, String dataSaida, String idServidor, String nsr, String idRelogio){
+    private boolean fecharSaidaAutomatico(int idRegistro, String dataSaida, int idServidor){
+        try{
+            
+            ConexaoMySQL conexao = new ConexaoMySQL();
+            Connection conn = conexao.criarConexao();
+            
+            Statement stm = conn.createStatement();
+            
+            String updateSaida = " UPDATE `registro` "
+                    + " SET `dt_saida`= '"+dataSaida+"' "
+                    + " ,  st_registro = 0, st_ponto_aberto = 1, obs = 'Ponto fechado automaticamente. Horário não contabilizado.'"
+                    + " , `data_ultima_atualizacao`= NOW(), `atualizado_por`= 'JAVINHA_SMS' "
+                    + " WHERE `id_registro` = '"+idRegistro+"' AND `st_registro` = '1'";
+            
+            boolean b = stm.execute(updateSaida);
+            
+            mudaStatus(idServidor, 0);
+            
+            return true;
+        }catch(Exception e){
+            System.err.println(e.getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Este método realiza a atualização de ponto/registro como saida 
+     * @param idRegistro - ID de registro 
+     * @param dataSaida - Data de Saída 
+     * @return - Returna <i>TRUE</i> quando a operação não apresenta erro durantes
+     * a execução; e <i>FALSE</i> quando ocorre algum problema durante a execução.
+     */
+    private boolean inserirComoSaida(int idRegistro, String dataSaida, int idServidor, String nsr, int idRelogio){
         try{            
             
             String obs = ", obs = NULL";
@@ -154,7 +234,11 @@ public class ColetaDB implements ColetaDBInterface {
                 obs = "";
             }           
             
-            String updateSaida = "UPDATE `registro` SET `dt_saida`= '"+dataSaida+"', st_registro = '0', st_ponto_aberto = 0 "+obs+", `data_ultima_atualizacao`= NOW(), `atualizado_por`= 'JAVINHA_SMS', `nsr_saida` = '"+nsr+"', `idrelogio_saida` = '"+idRelogio+"'  WHERE `id_registro` = '"+idRegistro+"'";
+            String updateSaida = "UPDATE `registro` "
+                    + " SET `dt_saida`= '"+dataSaida+"', st_registro = '0', st_ponto_aberto = 0 "
+                    + " "+obs+", `data_ultima_atualizacao`= NOW(), `atualizado_por`= 'JAVINHA_SMS' "
+                    + " , `nsr_saida` = '"+nsr+"', `idrelogio_saida` = '"+idRelogio+"' "
+                    + " WHERE `id_registro` = '"+idRegistro+"' ";
             System.out.println(updateSaida);
             
             boolean b = stm.execute(updateSaida);
@@ -178,7 +262,7 @@ public class ColetaDB implements ColetaDBInterface {
      * @return - Retorna <i>TRUE</i> caso as operações de atualização ocorra bem, 
      * ou retorna <i>FALSE</i> em caso a execuação de atualização ocorra erro.
      */
-    private boolean mudaStatus(String idServidor, int novoStatus){
+    private boolean mudaStatus(int idServidor, int novoStatus){
         try{
             
             ConexaoMySQL conexao = new ConexaoMySQL();
