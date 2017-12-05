@@ -8,6 +8,9 @@ package riodofogo;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  *
@@ -25,4 +28,47 @@ public class Auxiliar {
         BufferedReader lerArquivo = new BufferedReader(arquivo);     
         return lerArquivo;
     }
+    
+    /**
+     * Método compare duas datas
+     * @param data1 - String - data a ser comparada
+     * @param data2 - String - a outras data a ser comparada
+     * @return - retona 1 se igual, 0 se diferente e -1 em caso apresente algum problema durante 
+     * o teste de comparação
+     */    
+    public static int compareData(String data1, String data2){
+        try{
+            
+            int[] arrayData1 = new int[3];
+            int[] arrayData2 = new int[3];
+            
+            Calendar calendario = Calendar.getInstance();            
+            SimpleDateFormat format_ = new SimpleDateFormat("yyyy-MM-dd");                      
+            
+            //pegando a primeira data (data1)
+            Date data = (Date)format_.parse(data1);                        
+            calendario.setTime(data);
+            arrayData1[0] = calendario.get(Calendar.DAY_OF_MONTH);
+            arrayData1[1] = calendario.get(Calendar.MONTH);
+            arrayData1[2] = calendario.get(Calendar.YEAR);
+            
+            //pegando a segunda data (data2)
+            data = (Date) format_.parse(data2);
+            calendario.setTime(data);            
+            arrayData2[0] = calendario.get(Calendar.DAY_OF_MONTH);
+            arrayData2[1] = calendario.get(Calendar.MONTH);
+            arrayData2[2] = calendario.get(Calendar.YEAR);   
+                       
+            //testando as datas
+            if(arrayData1[0] == arrayData2[0] && arrayData1[1] == arrayData2[1] && arrayData1[2] == arrayData2[2])
+            {                
+                return 1;
+            }else{             
+                return 0;
+            }        
+        }catch(Exception e){
+            System.err.println(e.getMessage());
+            return -1;
+        }            
+    }    
 }

@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import riodofogo.Auxiliar;
 
 /**
  *
@@ -47,6 +48,56 @@ public class ColetaDB implements ColetaDBInterface {
     }
 
     
+    
+    
+    /**
+     * Método busca verificar se para o determindado servidor existe um registro
+     * aberto, ou seja, se o mesmo ainda não bateu o ponto de saída.
+     * @return Retorna 0 em caso de não encontrado ou retorna id_registro da 
+     * Tabela registro no caso de encontrado em aberto; Ou ainda pode retornar
+     * -1 em caso de erro;
+     */
+    private Registro getRegistroAbertoMySQL(int idRegistro){
+        
+        try{                        
+            Registro retorno = null;
+            ConexaoMySQL conexao = new ConexaoMySQL();
+            Connection conn = conexao.criarConexao();        
+            
+            Statement stm = conn.createStatement();
+            
+            String sqlQuery = "SELECT * FROM `registro` "
+                    + "WHERE `id_registro` = '"+idRegistro+"' "
+                    + "AND `dt_saida` = '0000-00-00 00:00:00' "
+                    + "AND `st_registro` = '1' ";                        
+            ResultSet rs = stm.executeQuery(sqlQuery);
+            
+            while(rs.next()){
+                retorno = new Registro(
+                        Integer.parseInt(rs.getString(1)), 
+                        Integer.parseInt(rs.getString(2)), 
+                        rs.getString(3), 
+                        rs.getString(4),
+                        rs.getString(5), 
+                        rs.getString(6), 
+                        rs.getString(7),
+                        rs.getString(8),
+                        rs.getString(9),
+                        rs.getString(10)
+                );                        
+            } 
+
+            rs.close();
+            stm.close();
+            conn.close();
+          
+            return retorno;
+        }catch(SQLException | NumberFormatException e){
+            System.err.println(e.getMessage());
+            return null;
+        }
+    }
+    
     @Override
     public boolean gravarColeta(int idServidor, int idRelogio, Coleta coleta) {
         if(verificarColetaInserida(idServidor, idRelogio, coleta)){
@@ -56,13 +107,19 @@ public class ColetaDB implements ColetaDBInterface {
             int idRegistroAberto = this.getIdRegistroAberto(idServidor);
             
             if(idRegistroAberto > 0){
-                System.out.println("Buscar registro aberto");
-                System.out.println("Inserir como saida");
+                Registro registro = this.getRegistroAbertoMySQL(idRegistroAberto);
+                int testeDatasIguais = Auxiliar.compareData(coleta.getData(), registro.getDt_entrada());
+                if(testeDatasIguais > 0){
+                    System.out.println("Inserir como saida");
+                }else{
+                    System.out.println("Inserir saida automaticamente");
+                    System.out.println("Inserir como entrada");
+                }                
             }else{
                 if(testarServidorPlantonistaNoturno(idServidor)){
-                    
+                    System.out.println("Servidor Plantonista");
                 }else{
-                    
+                    System.out.println("2 Inserir como nova entrada");
                 }
             }            
         }
