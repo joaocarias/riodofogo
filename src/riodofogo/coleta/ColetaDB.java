@@ -57,11 +57,54 @@ public class ColetaDB implements ColetaDBInterface {
             
             if(idRegistroAberto > 0){
                 System.out.println("Buscar registro aberto");
+                System.out.println("Inserir como saida");
             }else{
-                System.out.println("inserir registro no BD");
+                if(testarServidorPlantonistaNoturno(idServidor)){
+                    
+                }else{
+                    
+                }
             }            
         }
         return true;
+    }
+    
+    /**
+     * Método testar se o servidor é plantomista
+     * @param idServidor - Id do Servidor 
+     * @return - Retorna <i>TRUE</i> em caso do servidor seja plantonista. Retorna <i>FALSE</i>
+     * 
+     */
+    private boolean testarServidorPlantonistaNoturno(int idServidor){
+        try{
+            ConexaoMySQL conexao = new ConexaoMySQL();
+            Connection conn = conexao.criarConexao();
+            
+            Statement stm = conn.createStatement();
+            
+            String query = "SELECT * FROM `plantonista` WHERE `id_servidor` = '"+idServidor+"' AND `noturno` = '1' ";
+            
+            ResultSet rs = stm.executeQuery(query);
+            
+            if(rs.first()){
+                
+                rs.close();
+                stm.close();
+                conn.close();
+                
+                return true;
+            }else{
+                
+                rs.close();
+                stm.close();
+                conn.close();
+                
+                return false;
+            }
+        }catch(Exception e){
+            System.err.println(e.getMessage());
+            return false;
+        }        
     }
     
     /**
@@ -93,7 +136,7 @@ public class ColetaDB implements ColetaDBInterface {
             conn.close();
             
             return idRegistroAberto;
-        }catch(Exception e){
+        }catch(SQLException | NumberFormatException e){
             System.err.println(e.toString());
             return -1;
         }        
