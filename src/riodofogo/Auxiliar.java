@@ -70,5 +70,25 @@ public class Auxiliar {
             System.err.println(e.getMessage());
             return -1;
         }            
-    }    
+    }   
+    
+    public static String dataComMascara(String data){
+        try{                        
+            String data_tratada = data.substring(4,8)+"-"+data.substring(2,4)+"-"+data.substring(0,2);
+            return data_tratada;
+        }catch(Exception e){
+            System.err.println(e.getMessage());
+            return data;
+        }
+    }
+    
+    public static String horaComMascara(String hora){
+        try{                        
+            String hora_tratada = hora.substring(0,2)+":"+hora.substring(2,4)+":00";
+            return hora_tratada;
+        }catch(Exception e){
+            System.err.println(e.getMessage());
+            return hora;
+        }
+    }
 }

@@ -108,41 +108,77 @@ public class ColetaDB implements ColetaDBInterface {
             
             if(idRegistroAberto > 0){
                 Registro registro = this.getRegistroAbertoMySQL(idRegistroAberto);
-                int testeDatasIguais = Auxiliar.compareData(coleta.getData(), registro.getDt_entrada());
+                int testeDatasIguais = Auxiliar.compareData(Auxiliar.dataComMascara(coleta.getData()), registro.getDt_entrada());
                 if(testeDatasIguais > 0){
-                    if(inserirComoSaida(idRegistroAberto, coleta.getData(), idServidor, coleta.getNsr(), idRelogio)){                        
-                        System.out.println("SAÍDA: "+coleta.getData());                        
+                    if(inserirComoSaida(idRegistroAberto, Auxiliar.dataComMascara(coleta.getData())+" "+Auxiliar.horaComMascara(coleta.getHora()) , idServidor, coleta.getNsr(), idRelogio)){                        
+                        System.out.println("SAÍDA: "+coleta.getData() +" "+coleta.getHora());                        
                     }else{
-                        System.err.println("Erro ao inserir saida no ponto: "+coleta.getData()+" PIS: "+coleta.getPis());                        
+                        System.err.println("Erro ao inserir saida no ponto: "+coleta.getData()+" "+Auxiliar.horaComMascara(coleta.getHora())+" PIS: "+coleta.getPis());                        
                     }
                 }else{
-                    fecharSaidaAutomatico(idRegistroAberto, coleta.getData(), idServidor);
-                    System.out.println("Ponto Fechado Automaticamente: "+coleta.getData());                        
-                    inserirComoEntrada(idServidor, coleta.getData(), coleta.getNsr(), idRelogio);                      
+                    fecharSaidaAutomatico(idRegistroAberto, registro.getDt_entrada(), idServidor);
+                    System.out.println("Ponto Fechado Automaticamente: "+registro.getDt_entrada());                        
+                    inserirComoEntrada(idServidor, Auxiliar.dataComMascara(coleta.getData())+" "+Auxiliar.horaComMascara(coleta.getHora()), coleta.getNsr(), idRelogio);                      
                     System.out.println("ENTRADA: "+coleta.getData());
                 }                
             }else{
                 if(testarServidorPlantonistaNoturno(idServidor)){
-                    int idRegistroFechadoAutomatico = testarRegistroFechadoAutomaticoPorEmDiaAnterior(coleta.getData(), idServidor);
-                        if(idRegistroFechadoAutomatico > 0){
-                            if(inserirComoSaida(idRegistroFechadoAutomatico, coleta.getData(), idServidor, coleta.getNsr(), idRelogio)){
-                                System.out.println("Inserido Saída Ponto: "+coleta.getData()+" "+idRegistroFechadoAutomatico);                                              
-                            }else{
-                                System.err.println("Erro ao inserir saida no ponto: "+coleta.getData());                            
-                            }
+                    int idRegistroFechadoAutomatico = testarRegistroFechadoAutomaticoPorEmDiaAnterior(Auxiliar.dataComMascara(coleta.getData()), idServidor);
+                    if(idRegistroFechadoAutomatico > 0){
+                        if(inserirComoSaida(idRegistroFechadoAutomatico, Auxiliar.dataComMascara(coleta.getData())+" "+Auxiliar.horaComMascara(coleta.getHora()), idServidor, coleta.getNsr(), idRelogio)){
+                            System.out.println("Inserido Saída Ponto: "+Auxiliar.dataComMascara(coleta.getData())+" "+idRegistroFechadoAutomatico);                                              
                         }else{
-                            if(inserirComoEntrada(idServidor, coleta.getData(), coleta.getNsr(), idRelogio)){
-                                System.out.println("ENTRADA: "+coleta.getData());                            
-                            }else{
-                                System.err.println("Erro ao inserir ponto: "+coleta.getData());
-                            }  
+                            System.err.println("Erro ao inserir saida no ponto: "+coleta.getData());                            
                         }
                     }else{
-                        System.out.println("2 Inserir como nova entrada");
+                        if(inserirComoEntrada(idServidor, Auxiliar.dataComMascara(coleta.getData())+" "+Auxiliar.horaComMascara(coleta.getHora()), coleta.getNsr(), idRelogio)){
+                            System.out.println("ENTRADA: "+coleta.getData());                            
+                        }else{
+                            System.err.println("Erro ao inserir ponto: "+coleta.getData());
+                        }  
                     }
+                }else{
+                    if(inserirComoEntrada(idServidor, Auxiliar.dataComMascara(coleta.getData())+" "+Auxiliar.horaComMascara(coleta.getHora()), coleta.getNsr(), idRelogio)){
+                        System.out.println("ENTRADA: "+coleta.getData());                            
+                    }else{
+                        System.err.println("Erro ao inserir ponto: "+coleta.getData());
+                    }  
+                }                
             }            
         }
         return true;
+    }
+    
+    private int testarRegistroFechadoAutomaticoPorEmDiaAnterior(String dataColeta, int idServidor) {
+        try{
+            int id = 0;
+            
+            ConexaoMySQL conexao = new ConexaoMySQL();
+            Connection conn = conexao.criarConexao();
+            Statement stm = conn.createStatement();
+            
+            String query = " SELECT id_registro "
+                    + " FROM `registro` "
+                    + " WHERE DAYOFYEAR(dt_entrada) = (DAYOFYEAR('"+dataColeta+"')-1) "
+                    + " AND YEAR(dt_entrada) = YEAR(NOW()) "
+                    + " AND st_ponto_aberto = '1' "
+                    + " AND id_servidor = '"+idServidor+"' ";
+            
+            ResultSet rs = stm.executeQuery(query);
+            
+            while(rs.next()){
+                id = Integer.parseInt(rs.getString(1));
+            }
+            
+            rs.close();
+            stm.close();
+            conn.close();            
+            
+            return id;
+        }catch(Exception e){
+            System.err.println(e.getMessage());
+            return -1;
+        }        
     }
     
      /**
