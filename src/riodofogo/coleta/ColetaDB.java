@@ -12,6 +12,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import riodofogo.Auxiliar;
+import riodofogo.pis.Pis;
+import riodofogo.pis.TmpListaPis;
 
 /**
  *
@@ -39,6 +41,10 @@ public class ColetaDB implements ColetaDBInterface {
             rs.close();
             stm.close();
             conn.close();
+            
+            if(idServidor == 0){
+                TmpListaPis.adicionaPis(new Pis(pis));
+            }
             
             return idServidor;
         }catch(SQLException | NumberFormatException e){

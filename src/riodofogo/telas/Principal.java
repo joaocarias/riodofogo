@@ -9,9 +9,11 @@ import java.util.Iterator;
 import java.util.List;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import log.MeuLog;
 import riodofogo.coleta.Coleta;
 import riodofogo.coleta.FachadaColeta;
 import riodofogo.coleta.Leitura;
+import riodofogo.pis.TmpListaPis;
 import riodofogo.relogio.FachadaRelogio;
 import riodofogo.relogio.Relogio;
 
@@ -216,7 +218,8 @@ public class Principal extends javax.swing.JFrame {
             
             Leitura in = new Leitura();
             List<Coleta> lista = in.lerArquivo(tf_caminho_arquivo.getText());
-            System.out.println("Número de Coletas: "+lista.size());
+            //System.out.println("Número de Coletas: "+lista.size());
+            MeuLog.gravaLog("Número de Coletas: "+lista.size(), MeuLog.INFO);
             
             Iterator it = lista.iterator();
             
@@ -233,18 +236,27 @@ public class Principal extends javax.swing.JFrame {
                 }else{
                     contColetasJaSalvas++;
                 }
-            }                        
-        }   
-        
-        System.out.println("Coletas Salvas: "+contColetasSalvas);
-        System.out.println("Coletas Já Salvas: "+contColetasJaSalvas);
-        System.out.println("Coletas Com PIS não Encontrado: "+contColetasComPisNaoEncontrado);
-        System.out.println("Erros: "+contColetaErros);
-        
+            }  
+            
+            //System.out.println("Coletas Salvas: "+contColetasSalvas);
+            MeuLog.gravaLog("Coletas Salvas: "+contColetasSalvas, MeuLog.INFO);
+            //System.out.println("Coletas Já Salvas: "+contColetasJaSalvas);
+            MeuLog.gravaLog("Coletas Já Salvas: "+contColetasJaSalvas, MeuLog.INFO);
+            //System.out.println("Coletas Com PIS não Encontrado: "+contColetasComPisNaoEncontrado);
+            MeuLog.gravaLog("Coletas Com PIS não Encontrado: "+contColetasComPisNaoEncontrado, MeuLog.INFO);
+            MeuLog.gravaLog("Quantidade de PIS não Encontrado: "+TmpListaPis.getTamanho(), MeuLog.INFO);
+            //System.out.println("Erros: "+contColetaErros);  
+            MeuLog.gravaLog("Erros: "+contColetaErros, MeuLog.INFO);
+            
+            
+        }           
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
-        // TODO add your handling code here:
+        Sobre s = new Sobre();
+        s.setVisible(true);
+        s.setLocationRelativeTo(null);
+        s.setTitle(this.getTitle()+" - Sobre");
     }//GEN-LAST:event_jMenuItem2ActionPerformed
 
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
